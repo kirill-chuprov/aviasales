@@ -1,0 +1,86 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
+apply plugin: "kotlin-kapt"
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+        }
+
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+flavorDimensions "default"
+
+    productFlavors {
+        stage {
+            dimension "default"
+            buildConfigField "String", "BASE_URL", '"HERE_MUST_BE_YOUR_URL"'
+            buildConfigField "String", "API_KEY", '"HERE_MUST_BE_YOUR_API_KEY"'
+        }
+
+        prod {
+            dimension "default"
+            buildConfigField "String", "BASE_URL", '"HERE_MUST_BE_YOUR_URL"'
+            buildConfigField "String", "API_KEY", '"HERE_MUST_BE_YOUR_API_KEY"'
+        }
+    }}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation Deps.appCompat
+    implementation Deps.kotlinStdlib
+
+    implementation Deps.lifecycle
+
+    implementation Deps.rxJava
+    implementation Deps.rxRelay
+    implementation Deps.rxAndroid
+
+    implementation Deps.okHttp
+    implementation Deps.okHttpInteceptor
+
+    implementation Deps.retrofit
+    implementation Deps.retrofitRxJavaAdapter
+    implementation Deps.retrofitConverterLoganSquare
+
+    implementation Deps.loganSquare
+    kapt Deps.loganSquareCompiler
+    implementation Deps.jacksonCore
+
+    implementation Deps.room
+    implementation Deps.rxRoom
+    kapt Deps.roomCompiler
+
+    debugImplementation Deps.debugDb
+
+    implementation Deps.koinCore
+    implementation Deps.koinAndroid
+    implementation Deps.koinCoreScope
+    implementation Deps.koinAndroidViewModel
+
+    testImplementation Deps.jUnit
+    androidTestImplementation Deps.androidTestRunner
+    androidTestImplementation Deps.espresso
+}
+repositories {
+    mavenCentral()
+}

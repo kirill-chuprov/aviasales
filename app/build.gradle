@@ -1,0 +1,84 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.aviasales.task"
+        minSdkVersion 22
+        targetSdkVersion 28
+        versionCode 1
+        versionName "0.0.1"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+
+  flavorDimensions "default"
+
+    productFlavors {
+        stage {
+            dimension "default"
+            buildConfigField "String", "BASE_URL", '"url"'
+        }
+
+        prod {
+            dimension "default"
+            buildConfigField "String", "BASE_URL", '"url"'
+        }
+    }
+    buildTypes {
+        debug {
+            minifyEnabled false
+        }
+
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
+        }
+    }
+
+    dataBinding {
+        enabled = true
+    }
+}
+
+dependencies {
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(':repository')
+    implementation project(':utils')
+
+    implementation Deps.kotlinStdlib
+    implementation Deps.androidKtx
+
+    implementation Deps.constraintLayout
+    implementation Deps.appCompat
+
+    implementation Deps.material
+
+    implementation Deps.rxJava
+    implementation Deps.rxKotlin
+    implementation Deps.rxAndroid
+    implementation Deps.rxRelay
+    implementation Deps.rxBindingKotlin
+    implementation Deps.rxBindingDesignKotlin
+    implementation Deps.rxBindingAppCompatV7Kotlin
+
+    implementation Deps.navigationFragment
+    implementation Deps.navigationUI
+
+    implementation Deps.lifecycle
+
+    implementation Deps.koinCore
+    implementation Deps.koinAndroid
+    implementation Deps.koinCoreScope
+    implementation Deps.koinAndroidViewModel
+
+    testImplementation Deps.jUnit
+    androidTestImplementation Deps.androidTestRunner
+    androidTestImplementation Deps.espresso
+}
