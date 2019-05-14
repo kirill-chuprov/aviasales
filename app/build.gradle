@@ -14,16 +14,52 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        def keystorePropertiesFile = rootProject.file("keystore.properties")
+        def keystoreProperties = new Properties()
+        keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
-  flavorDimensions "default"
+        signDebug {
+            storeFile file(keystoreProperties['KEYSTORE_FILE_PATH'])
+            storePassword keystoreProperties['KEYSTORE_PASSWORD']
+            keyAlias keystoreProperties['DEBUG_KEY_ALIAS']
+            keyPassword keystoreProperties['DEBUG_KEY_ALIAS_PASSWORD']
+        }
+
+        signRelease {
+            storeFile file(keystoreProperties['KEYSTORE_FILE_PATH'])
+            storePassword keystoreProperties['KEYSTORE_PASSWORD']
+            keyAlias keystoreProperties['DEBUG_KEY_ALIAS']
+            keyPassword keystoreProperties['DEBUG_KEY_ALIAS_PASSWORD']
+        }
+    }
+
+    flavorDimensions "default"
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def date = new Date().format("dd-MM-yy", TimeZone.getTimeZone("UTC"))
+            outputFileName = "AviasalesTask" +
+                    "_v${defaultConfig.versionName}" +
+                    "_${date}" +
+                    ".apk"
+        }
+    }
 
     productFlavors {
         stage {
+            signingConfig signingConfigs.signDebug
             dimension "default"
             buildConfigField "String", "BASE_URL", '"url"'
         }
 
         prod {
+            signingConfig signingConfigs.signRelease
             dimension "default"
             buildConfigField "String", "BASE_URL", '"url"'
         }
@@ -34,7 +70,7 @@ android {
         }
 
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
                     'proguard-rules.pro'
         }
@@ -78,7 +114,11 @@ dependencies {
     implementation Deps.koinCoreScope
     implementation Deps.koinAndroidViewModel
 
+    implementation Deps.googleMaps
+    implementation Deps.googleLocation
+
     testImplementation Deps.jUnit
     androidTestImplementation Deps.androidTestRunner
     androidTestImplementation Deps.espresso
 }
+

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Aviasales</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyChJC2xWAruRIRR1hY-tLtGxhTDwOydI10</string>
+    <string name="maps"> Maps </string>
 </resources>
