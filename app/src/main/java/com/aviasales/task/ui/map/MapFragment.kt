@@ -1,22 +1,33 @@
 package com.aviasales.task.ui.map
 
+import android.animation.ValueAnimator
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.LinearInterpolator
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import com.aviasales.task.computePoints
+import com.aviasales.task.R
 import com.aviasales.task.ui.map.MapFragmentStateIntent.GetSampleData
 import com.aviasales.task.utils.common.BaseFragment
 import com.aviasales.task.utils.common.BaseView
+import com.aviasales.task.utils.common.computePoints
+import com.aviasales.task.utils.common.getBitmapFromView
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.Dash
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.Dot
 import com.google.android.gms.maps.model.Gap
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.PatternItem
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.maps.android.SphericalUtil
 import io.reactivex.Observable
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.Arrays
@@ -25,6 +36,7 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
   BaseView<MapFragmentState> {
 
   private val vmMapFragmentScreen: MapFragmentViewModel by viewModel()
+  private val handler by lazy { Handler() }
 
   override fun resLayoutId(): Int = com.aviasales.task.R.layout.fragment_map
 
@@ -76,18 +88,88 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
   private fun initMap(savedInstanceState: Bundle?) {
     with(viewBinding!!) {
       map.onCreate(savedInstanceState)
-      map.getMapAsync {
+      map.getMapAsync { googleMap ->
 
-        val ny = LatLng(40.7143528, -74.0059731)
-        it.moveCamera(CameraUpdateFactory.newLatLng(ny))
-        val computePoints = computePoints()
+        val fromX = LatLng(40.802237, -74.126443)
+        val toY = LatLng(-26.249035, 26.740388)
+
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(fromX))
+        val computedPoints = computePoints(fromX, toY)
         val pattern = Arrays.asList(Dot(), Gap(25f))
         val polylineOptions = PolylineOptions()
         polylineOptions.pattern(pattern)
-        computePoints.forEach { polylineOptions.add(it) }
-        it.addPolyline(polylineOptions)
+        computedPoints.forEach { polylineOptions.add(it) }
+        googleMap.addPolyline(polylineOptions)
+
+        val view = layoutInflater.inflate(R.layout.marker, null)
+
+        val bitmapFromView = getBitmapFromView(view)
+        val scaledBitmap1 = Bitmap.createScaledBitmap(bitmapFromView, 100, 100, false)
+
+
+        googleMap.addMarker(MarkerOptions().position(fromX).anchor(0.5f, 1f)).setIcon(BitmapDescriptorFactory.fromBitmap(bitmapFromView))
+        googleMap.addMarker(
+          MarkerOptions().position(toY)
+            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+            .anchor(0.5f, 1f)
+        )
+        val plane = googleMap.addMarker(MarkerOptions().flat(true).position(fromX))
+        val drawable = ContextCompat.getDrawable(context!!, R.drawable.ic_plane) as BitmapDrawable
+        val scaledBitmap = Bitmap.createScaledBitmap(drawable.bitmap, 100, 100, false)
+
+        plane.setIcon(BitmapDescriptorFactory.fromBitmap(scaledBitmap))
+
+        animatePlane(computedPoints, plane)
+
       }
     }
+  }
+
+  var index = -1
+  var next = 1
+
+  private fun animatePlane(
+    computedPoints: List<LatLng>,
+    marker: Marker
+  ) {
+    handler.postDelayed(object : Runnable {
+      override fun run() {
+        lateinit var startPosition: LatLng
+        lateinit var endPosition: LatLng
+
+        if (index < computedPoints.lastIndex) {
+          index++
+          next = index + 1
+        }
+
+        if (index < computedPoints.lastIndex) {
+          startPosition = computedPoints[index]
+          endPosition = computedPoints[next]
+        } else return
+
+        val valueAnimator = ValueAnimator.ofFloat(0.toFloat(), 1.toFloat())
+        valueAnimator.duration = 300 // duration 3 second
+        valueAnimator.interpolator = LinearInterpolator()
+        valueAnimator.addUpdateListener { animation ->
+
+          val v = animation.animatedFraction
+          val lng = v * endPosition.longitude + (1 - v) * startPosition.longitude
+          val lat = v * endPosition.latitude + (1 - v) * startPosition.latitude
+
+          val newPosition = LatLng(lat, lng)
+          marker.position = newPosition
+          marker.setAnchor(0.5f, 0.5f)
+          marker.rotation = SphericalUtil.computeHeading(startPosition, endPosition).toFloat()
+
+        }
+        valueAnimator.start()
+
+        if (index != computedPoints.lastIndex) {
+          handler.postDelayed(this, 300)
+        }
+      }
+    }, 300)
+
   }
 
   private fun initNavigationClicks() {

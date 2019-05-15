@@ -116,6 +116,7 @@ dependencies {
 
     implementation Deps.googleMaps
     implementation Deps.googleLocation
+    implementation Deps.googleMapsUtils
 
     testImplementation Deps.jUnit
     androidTestImplementation Deps.androidTestRunner

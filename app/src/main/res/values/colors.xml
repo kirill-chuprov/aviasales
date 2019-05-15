@@ -7,9 +7,7 @@
     <color name="aviasalesPrimaryDark">#007EA5</color>
     <color name="aviasalesPrimary">#FF009DCF</color>
     <color name="colorTextBlack">#323643</color>
-    <color name="colorDivider">#E6E6E6</color>
+    <color name="marker_color">#FFFBCB69</color>
 
-    <color name="daySelected">#363636</color>
-    <color name="shiurim_text_black">#FF363636</color>
 
 </resources>

@@ -90,6 +90,7 @@ object Version {
   const val googleAuth = "16.0.0"
   const val googleMaps = "16.0.0"
   const val googleLocation = "16.0.0"
+  const val googleMapsUtils = "0.5+"
 
   // tests
   const val jUnit = "4.12"
@@ -245,6 +246,7 @@ object Deps {
   //Maps
   const val googleMaps = "com.google.android.gms:play-services-maps:${Version.googleMaps}"
   const val googleLocation = "com.google.android.gms:play-services-location:${Version.googleLocation}"
+  const val googleMapsUtils = "com.google.maps.android:android-maps-utils:${Version.googleMapsUtils}"
 
   // Tests
   const val jUnit = "junit:junit:${Version.jUnit}"
