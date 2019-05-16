@@ -3,11 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@id/mapFragment">
+    app:startDestination="@id/chooseDestinationFragment">
 
   <fragment
       android:id="@+id/mapFragment"
       android:name="com.aviasales.task.ui.map.MapFragment"
       tools:layout="@layout/fragment_map"
       android:label="MapFragment"/>
+  <fragment
+      android:id="@+id/chooseDestinationFragment"
+      android:name="com.aviasales.task.ui.destination.ChooseDestinationFragment"
+      tools:layout="@layout/fragment_choose_destination"
+      android:label="ChooseDestinationFragment">
+    <action
+        android:id="@+id/action_chooseDestinationFragment_to_mapFragment"
+        app:destination="@id/mapFragment"/>
+  </fragment>
 </navigation>

@@ -1,20 +1,16 @@
 package com.aviasales.task.ui.map
 
 import android.animation.ValueAnimator
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
-import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import com.aviasales.task.R
-import com.aviasales.task.ui.map.MapFragmentStateIntent.GetSampleData
+import com.aviasales.task.databinding.MarkerBinding
+import com.aviasales.task.ui.map.MapFragmentStateIntent.CalculatePath
 import com.aviasales.task.utils.common.BaseFragment
 import com.aviasales.task.utils.common.BaseView
 import com.aviasales.task.utils.common.computePoints
@@ -37,6 +33,17 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
 
   private val vmMapFragmentScreen: MapFragmentViewModel by viewModel()
   private val handler by lazy { Handler() }
+
+  private val fromLat: Double by lazy { arguments!!.getDouble("fromLat", 0.0) }
+  private val fromLng: Double by lazy { arguments!!.getDouble("fromLng", 0.0) }
+  private val toLat: Double by lazy { arguments!!.getDouble("toLat", 0.0) }
+  private val toLng: Double by lazy { arguments!!.getDouble("toLng", 0.0) }
+
+  private val townFrom: String by lazy { arguments!!.getString("townFrom", "") }
+  private val townTo: String by lazy { arguments!!.getString("townTo", "") }
+
+  private val fromCoordinate: LatLng by lazy { LatLng(fromLat, fromLng) }
+  private val toCoordinate: LatLng by lazy { LatLng(toLat, toLng) }
 
   override fun resLayoutId(): Int = com.aviasales.task.R.layout.fragment_map
 
@@ -77,10 +84,15 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
     viewBinding!!.map.onLowMemory()
   }
 
+  private fun initNavigationClicks() {
+    viewBinding!!.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+  }
+
+
   override fun initIntents() {
     viewSubscriptions = Observable.merge(
       listOf(
-        Observable.just(GetSampleData)
+        Observable.just(CalculatePath(fromCoordinate, toCoordinate))
       )
     ).subscribe(vmMapFragmentScreen.viewIntentsConsumer())
   }
@@ -94,32 +106,45 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
         val toY = LatLng(-26.249035, 26.740388)
 
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(fromX))
-        val computedPoints = computePoints(fromX, toY)
-        val pattern = Arrays.asList(Dot(), Gap(25f))
-        val polylineOptions = PolylineOptions()
-        polylineOptions.pattern(pattern)
-        computedPoints.forEach { polylineOptions.add(it) }
-        googleMap.addPolyline(polylineOptions)
 
-        val view = layoutInflater.inflate(R.layout.marker, null)
-
-        val bitmapFromView = getBitmapFromView(view)
-        val scaledBitmap1 = Bitmap.createScaledBitmap(bitmapFromView, 100, 100, false)
+//        val computedPoints = computePoints(fromX, toY)
+//        val pattern = Arrays.asList(Dot(), Gap(25f))
+//        val polylineOptions = PolylineOptions()
+//        polylineOptions.pattern(pattern)
+//        computedPoints.forEach { polylineOptions.add(it) }
+//        googleMap.addPolyline(polylineOptions)
 
 
-        googleMap.addMarker(MarkerOptions().position(fromX).anchor(0.5f, 1f)).setIcon(BitmapDescriptorFactory.fromBitmap(bitmapFromView))
-        googleMap.addMarker(
-          MarkerOptions().position(toY)
-            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-            .anchor(0.5f, 1f)
-        )
-        val plane = googleMap.addMarker(MarkerOptions().flat(true).position(fromX))
-        val drawable = ContextCompat.getDrawable(context!!, R.drawable.ic_plane) as BitmapDrawable
-        val scaledBitmap = Bitmap.createScaledBitmap(drawable.bitmap, 100, 100, false)
+        val fromMarker = MarkerBinding.inflate(layoutInflater)
+        val markerTo = MarkerBinding.inflate(layoutInflater)
 
-        plane.setIcon(BitmapDescriptorFactory.fromBitmap(scaledBitmap))
+        fromMarker.town.text = townFrom
+        markerTo.town.text = townTo
 
-        animatePlane(computedPoints, plane)
+        val bitmapFromMarker = getBitmapFromView(fromMarker.root)
+        val bitmapToMarker = getBitmapFromView(markerTo.root)
+
+        googleMap.addMarker(MarkerOptions().position(fromX).anchor(0.5f, 1f)).setIcon(BitmapDescriptorFactory.fromBitmap(bitmapFromMarker))
+        googleMap.addMarker(MarkerOptions().position(toY).anchor(0.5f, 1f)).setIcon(BitmapDescriptorFactory.fromBitmap(bitmapToMarker))
+
+//        val bitmapFromView = getBitmapFromView(view)
+//        val scaledBitmap1 = Bitmap.createScaledBitmap(bitmapFromView, 100, 100, false)
+//
+//
+//        googleMap.addMarker(MarkerOptions().position(fromX).anchor(0.5f, 1f))
+//          .setIcon(BitmapDescriptorFactory.fromBitmap(bitmapFromView))
+//        googleMap.addMarker(
+//          MarkerOptions().position(toY)
+//            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+//            .anchor(0.5f, 1f)
+//        )
+//        val plane = googleMap.addMarker(MarkerOptions().flat(true).position(fromX))
+//        val drawable = ContextCompat.getDrawable(context!!, R.drawable.ic_plane) as BitmapDrawable
+//        val scaledBitmap = Bitmap.createScaledBitmap(drawable.bitmap, 100, 100, false)
+//
+//        plane.setIcon(BitmapDescriptorFactory.fromBitmap(scaledBitmap))
+//
+//        animatePlane(computedPoints, plane)
 
       }
     }
@@ -170,10 +195,6 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
       }
     }, 300)
 
-  }
-
-  private fun initNavigationClicks() {
-    viewBinding!!.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
   }
 
   override fun handleStates() {

@@ -1,26 +1,29 @@
-package com.aviasales.task.ui.map
+package com.aviasales.task.ui.destination
 
-import com.aviasales.task.ui.map.MapFragmentStateChange.Error
-import com.aviasales.task.ui.map.MapFragmentStateChange.HideError
-import com.aviasales.task.ui.map.MapFragmentStateChange.Loading
-import com.aviasales.task.ui.map.MapFragmentStateChange.Success
-import com.aviasales.task.ui.map.MapFragmentStateIntent.CalculatePath
+import com.aviasales.task.ui.destination.ChooseDestinationStateChange.Error
+import com.aviasales.task.ui.destination.ChooseDestinationStateChange.HideError
+import com.aviasales.task.ui.destination.ChooseDestinationStateChange.Loading
+import com.aviasales.task.ui.destination.ChooseDestinationStateChange.Success
+import com.aviasales.task.ui.destination.ChooseDestinationStateIntent.GetSampleData
 import com.aviasales.task.utils.common.BaseViewModel
 import com.aviasales.task.utils.common.startWithAndErrHandleWithIO
 import io.reactivex.Observable
 
-class MapFragmentViewModel : BaseViewModel<MapFragmentState>() {
+class ChooseDestinationViewModel() : BaseViewModel<ChooseDestinationState>() {
 
-  override fun initState(): MapFragmentState = MapFragmentState()
+  override fun initState(): ChooseDestinationState = ChooseDestinationState()
 
   override fun viewIntents(intentStream: Observable<*>): Observable<Any> =
     Observable.merge(
-      listOf(intentStream.ofType(CalculatePath::class.java)
+      listOf(intentStream.ofType(GetSampleData::class.java)
         .map { Success }
         .startWithAndErrHandleWithIO(Loading) { Observable.just(Error(it), HideError) })
     )
 
-  override fun reduceState(previousState: MapFragmentState, stateChange: Any): MapFragmentState =
+  override fun reduceState(
+    previousState: ChooseDestinationState,
+    stateChange: Any
+  ): ChooseDestinationState =
     when (stateChange) {
       is Loading -> previousState.copy(
         loading = true,
