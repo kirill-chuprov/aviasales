@@ -13,20 +13,14 @@ import com.aviasales.task.databinding.MarkerBinding
 import com.aviasales.task.ui.map.MapFragmentStateIntent.CalculatePath
 import com.aviasales.task.utils.common.BaseFragment
 import com.aviasales.task.utils.common.BaseView
-import com.aviasales.task.utils.common.computePoints
 import com.aviasales.task.utils.common.getBitmapFromView
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.Dot
-import com.google.android.gms.maps.model.Gap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.SphericalUtil
 import io.reactivex.Observable
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.Arrays
 
 class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBinding>(),
   BaseView<MapFragmentState> {
@@ -102,10 +96,10 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
       map.onCreate(savedInstanceState)
       map.getMapAsync { googleMap ->
 
-        val fromX = LatLng(40.802237, -74.126443)
-        val toY = LatLng(-26.249035, 26.740388)
-
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(fromX))
+        val from = LatLng(fromLat, fromLng)
+        val to = LatLng(toLat, toLng)
+//
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(fromX))
 
 //        val computedPoints = computePoints(fromX, toY)
 //        val pattern = Arrays.asList(Dot(), Gap(25f))
@@ -124,8 +118,10 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
         val bitmapFromMarker = getBitmapFromView(fromMarker.root)
         val bitmapToMarker = getBitmapFromView(markerTo.root)
 
-        googleMap.addMarker(MarkerOptions().position(fromX).anchor(0.5f, 1f)).setIcon(BitmapDescriptorFactory.fromBitmap(bitmapFromMarker))
-        googleMap.addMarker(MarkerOptions().position(toY).anchor(0.5f, 1f)).setIcon(BitmapDescriptorFactory.fromBitmap(bitmapToMarker))
+        googleMap.addMarker(MarkerOptions().position(from).anchor(0.5f, 1f))
+          .setIcon(BitmapDescriptorFactory.fromBitmap(bitmapFromMarker))
+        googleMap.addMarker(MarkerOptions().position(to).anchor(0.5f, 1f))
+          .setIcon(BitmapDescriptorFactory.fromBitmap(bitmapToMarker))
 
 //        val bitmapFromView = getBitmapFromView(view)
 //        val scaledBitmap1 = Bitmap.createScaledBitmap(bitmapFromView, 100, 100, false)

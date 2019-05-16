@@ -8,10 +8,10 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="StartTheme" parent="AppTheme">
-        <item name="android:windowBackground">@drawable/start_screen</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-    </style>
+  <!--<style name="StartTheme" parent="AppTheme">-->
+  <!--<item name="android:windowBackground">@drawable/start_screen</item>-->
+  <!--<item name="android:statusBarColor">@android:color/transparent</item>-->
+  <!--</style>-->
 
     <style name="ButtonSearch">
         <item name="android:background">@drawable/button_shape_ripple_black</item>

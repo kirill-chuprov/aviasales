@@ -1,24 +1,59 @@
 package com.aviasales.task.ui.destination
 
+import com.aviasales.task.repository.domain.entity.City
+import com.aviasales.task.repository.domain.interactors.GetCitiesUseCase
+import com.aviasales.task.ui.destination.ChooseDestinationStateChange.CityFromSelected
+import com.aviasales.task.ui.destination.ChooseDestinationStateChange.CityToSelected
+import com.aviasales.task.ui.destination.ChooseDestinationStateChange.ConfigurationChnages
 import com.aviasales.task.ui.destination.ChooseDestinationStateChange.Error
 import com.aviasales.task.ui.destination.ChooseDestinationStateChange.HideError
 import com.aviasales.task.ui.destination.ChooseDestinationStateChange.Loading
 import com.aviasales.task.ui.destination.ChooseDestinationStateChange.Success
-import com.aviasales.task.ui.destination.ChooseDestinationStateIntent.GetSampleData
+import com.aviasales.task.ui.destination.ChooseDestinationStateIntent.SelectCityFrom
+import com.aviasales.task.ui.destination.ChooseDestinationStateIntent.SelectCityTo
+import com.aviasales.task.ui.destination.ItemState.ItemCity
 import com.aviasales.task.utils.common.BaseViewModel
 import com.aviasales.task.utils.common.startWithAndErrHandleWithIO
 import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 
-class ChooseDestinationViewModel() : BaseViewModel<ChooseDestinationState>() {
+class ChooseDestinationViewModel(private val getCitiesUseCase: GetCitiesUseCase) :
+  BaseViewModel<ChooseDestinationState>() {
+
+  internal val eventPublisher: PublishSubject<ChooseDestinationStateIntent> by lazy { PublishSubject.create<ChooseDestinationStateIntent>() }
 
   override fun initState(): ChooseDestinationState = ChooseDestinationState()
 
   override fun viewIntents(intentStream: Observable<*>): Observable<Any> =
     Observable.merge(
-      listOf(intentStream.ofType(GetSampleData::class.java)
-        .map { Success }
-        .startWithAndErrHandleWithIO(Loading) { Observable.just(Error(it), HideError) })
+      listOf(
+        intentStream.ofType(ChooseDestinationStateIntent.GetCities::class.java)
+          .switchMap {
+            if (stateReceived().value == null) {
+              getCitiesUseCase.execute(it.term, it.lang)
+                .map { cities ->
+                  val list = cities.map { it.toPresentation() }
+                  Success(list)
+                }
+                .startWithAndErrHandleWithIO(Loading) { Observable.just(Error(it), HideError) }
+            } else Observable.just(ConfigurationChnages)
+
+          },
+        intentStream.ofType(SelectCityTo::class.java)
+          .map { CityToSelected(it.city) },
+        intentStream.ofType(SelectCityFrom::class.java)
+          .map { CityFromSelected(it.city) }
+      )
     )
+
+  private fun City.toPresentation() = ItemState.ItemCity(
+    id = id,
+    name = city,
+    countryCode = countryCode,
+    fullName = latinFullName,
+    lat = location.lat,
+    lon = location.lon
+  )
 
   override fun reduceState(
     previousState: ChooseDestinationState,
@@ -34,6 +69,18 @@ class ChooseDestinationViewModel() : BaseViewModel<ChooseDestinationState>() {
       is Success -> previousState.copy(
         loading = false,
         success = true,
+        cityFrom = if (stateChange.cities.isNotEmpty()) stateChange.cities[0] else ItemCity(),
+        cityTo = if (stateChange.cities.isNotEmpty()) stateChange.cities[1] else ItemCity(),
+        cities = stateChange.cities,
+        error = null
+      )
+
+      is ConfigurationChnages -> previousState.copy(
+        loading = false,
+        success = true,
+        cityFrom = previousState.cityFrom,
+        cityTo = previousState.cityTo,
+        cities = previousState.cities,
         error = null
       )
 
@@ -44,6 +91,8 @@ class ChooseDestinationViewModel() : BaseViewModel<ChooseDestinationState>() {
       )
 
       is HideError -> previousState.copy(error = null)
+      is CityFromSelected -> previousState.copy(cityFrom = stateChange.city)
+      is CityToSelected -> previousState.copy(cityTo = stateChange.city)
 
       else -> previousState
     }

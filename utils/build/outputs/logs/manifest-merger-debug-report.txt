@@ -1,37 +1,37 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml:1:1-47
-INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml:1:1-47
-INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml:1:1-47
-INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml:1:1-47
-INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml:1:1-47
-INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml:1:1-47
-INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml:1:1-47
+ADDED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml:1:1-47
+INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml:1:1-47
+INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml:1:1-47
+INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml:1:1-47
+INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml:1:1-47
+INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml:1:1-47
+INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml:1:1-47
 	package
-		ADDED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml:1:11-45
-		INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
-		INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
+		ADDED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml:1:11-45
+		INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
+		INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
 	android:versionName
-		INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
-		ADDED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml:1:1-47
-		INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
+		INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
+		ADDED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml:1:1-47
+		INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
 	xmlns:android
-		ADDED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml:1:1-47
+		ADDED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml:1:1-47
 	android:versionCode
-		INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
-		ADDED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml:1:1-47
-		INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
+		INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
+		ADDED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml:1:1-47
+		INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
 uses-sdk
-INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
-INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
-INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
-INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
+INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
+INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
+INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
+INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
 	android:targetSdkVersion
-		INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
-		ADDED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
-		INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
+		INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
+		ADDED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
+		INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
-		ADDED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
-		INJECTED from /home/user/AndroidStudioProjects/Aviasales/utils/src/main/AndroidManifest.xml
+		INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
+		ADDED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml
+		INJECTED from /Users/user/StudioProjects/aviasales/utils/src/main/AndroidManifest.xml

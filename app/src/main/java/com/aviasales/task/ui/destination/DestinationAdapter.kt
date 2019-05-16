@@ -7,10 +7,12 @@ import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.aviasales.task.BR
 import com.aviasales.task.R
-import com.aviasales.task.ui.destination.ChooseDestinationStateIntent.GoToMaps
-import com.aviasales.task.ui.destination.HomeAdapter.TownViewHolder
-import com.aviasales.task.ui.destination.ItemState.ItemTown
+import com.aviasales.task.ui.destination.ChooseDestinationStateIntent.SelectCityFrom
+import com.aviasales.task.ui.destination.ChooseDestinationStateIntent.SelectCityTo
+import com.aviasales.task.ui.destination.DestinationAdapter.TownViewHolder
+import com.aviasales.task.ui.destination.ItemState.ItemCity
 import com.jakewharton.rxbinding2.view.clicks
 import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.TimeUnit.MILLISECONDS
@@ -18,8 +20,12 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
 /**
  * Created by Kirill Chuprov on 5/16/19.
  */
-internal class HomeAdapter(private val eventPublisher: PublishSubject<ChooseDestinationStateIntent>) :
-  ListAdapter<ItemTown, TownViewHolder>(CATEGORY_COMPARATOR) {
+
+internal class DestinationAdapter(
+  private val eventPublisher: PublishSubject<ChooseDestinationStateIntent>,
+  val type: Int, val destinationBottomSheetDialogFragment: DestinationBottomSheetDialogFragment
+) :
+  ListAdapter<ItemCity, TownViewHolder>(CATEGORY_COMPARATOR) {
 
   private lateinit var inflater: LayoutInflater
   override fun onCreateViewHolder(
@@ -30,53 +36,38 @@ internal class HomeAdapter(private val eventPublisher: PublishSubject<ChooseDest
     return TownViewHolder(DataBindingUtil.inflate(inflater, viewType, parent, false))
   }
 
-  override fun getItemViewType(position: Int): Int = R.layout.item_category
+  override fun getItemViewType(position: Int): Int = R.layout.item_city
 
   override fun onBindViewHolder(holder: TownViewHolder, position: Int) =
     holder.bind(getItem(position))
 
   private companion object {
 
-    private val CATEGORY_COMPARATOR = object : DiffUtil.ItemCallback<ItemTown>() {
+    private val CATEGORY_COMPARATOR = object : DiffUtil.ItemCallback<ItemCity>() {
 
-      override fun areItemsTheSame(oldItem: ItemTown, newItem: ItemTown): Boolean =
+      override fun areItemsTheSame(oldItem: ItemCity, newItem: ItemCity): Boolean =
         oldItem.id == newItem.id
 
-      override fun areContentsTheSame(oldItem: ItemTown, newItem: ItemTown): Boolean =
+      override fun areContentsTheSame(oldItem: ItemCity, newItem: ItemCity): Boolean =
         oldItem == newItem
     }
   }
 
-  inner class TownViewHolder(val binding: ViewDataBinding) : ViewHolder(binding.root) {
+  inner class TownViewHolder(private val binding: ViewDataBinding) : ViewHolder(binding.root) {
 
     init {
       binding.root.clicks()
         .skip(300, MILLISECONDS)
         .map {
-          GoToMaps(
-            (getItem(adapterPosition) as ItemTown).id,
-
-          )
+          when (type) {
+            TYPE_FROM -> SelectCityFrom((getItem(adapterPosition) as ItemCity))
+            else -> SelectCityTo((getItem(adapterPosition) as ItemCity))
+          }.also { destinationBottomSheetDialogFragment.dismiss() }
         }
         .subscribe(eventPublisher)
     }
 
     fun bind(data: ItemState) {
-      if (binding is ItemCategoryBinding) {
-        with(binding) {
-          val itemCategory = getItem(adapterPosition) as ItemCategory
-          when {
-            itemCategory.isFree -> openLesson(this)
-            itemCategory.isPaid -> openLesson(this)
-            else -> closeLesson(this)
-          }
-
-          roundedCorners = 8
-          imgResId = R.drawable.lock
-        }
-
-      }
-
       if (binding.setVariable(BR.viewState, data)) binding.executePendingBindings()
     }
   }

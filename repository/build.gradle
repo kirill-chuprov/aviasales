@@ -32,13 +32,13 @@ flavorDimensions "default"
     productFlavors {
         stage {
             dimension "default"
-            buildConfigField "String", "BASE_URL", '"HERE_MUST_BE_YOUR_URL"'
+            buildConfigField "String", "BASE_URL", '"https://yasen.hotellook.com/"'
             buildConfigField "String", "API_KEY", '"HERE_MUST_BE_YOUR_API_KEY"'
         }
 
         prod {
             dimension "default"
-            buildConfigField "String", "BASE_URL", '"HERE_MUST_BE_YOUR_URL"'
+            buildConfigField "String", "BASE_URL", '"https://yasen.hotellook.com/"'
             buildConfigField "String", "API_KEY", '"HERE_MUST_BE_YOUR_API_KEY"'
         }
     }}
