@@ -5,9 +5,12 @@ import com.aviasales.task.repository.data.local.db.AviasalesDbProvider
 import com.aviasales.task.repository.data.remote.api.AviasalesApiProvider
 import com.aviasales.task.repository.data.remote.datasource.CitiesRemoteSource
 import com.aviasales.task.repository.data.repositoryImpl.CitiesRepositoryImpl
+import com.aviasales.task.repository.data.servicesImpl.GeoServiceImpl
 import com.aviasales.task.repository.domain.datasource.CitiesDataSource
+import com.aviasales.task.repository.domain.interactors.ComputeBezierPointsUseCase
 import com.aviasales.task.repository.domain.interactors.GetCitiesUseCase
 import com.aviasales.task.repository.domain.repository.CitiesRepository
+import com.aviasales.task.repository.domain.services.GeoService
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module.module
 
@@ -23,6 +26,9 @@ val repoModule = module {
 
   single<CitiesRepository> { CitiesRepositoryImpl(get("remote")) }
 
+  single<GeoService> { GeoServiceImpl() }
+
   factory { GetCitiesUseCase(get()) }
+  factory { ComputeBezierPointsUseCase(get()) }
 
 }

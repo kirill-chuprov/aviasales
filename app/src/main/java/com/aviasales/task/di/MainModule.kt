@@ -9,7 +9,7 @@ import org.koin.standalone.KoinComponent
 import org.koin.standalone.inject
 
 val mainModule = module {
-  viewModel { MapFragmentViewModel() }
+  viewModel { MapFragmentViewModel(get()) }
   viewModel { ChooseDestinationViewModel(get()) }
 }
 

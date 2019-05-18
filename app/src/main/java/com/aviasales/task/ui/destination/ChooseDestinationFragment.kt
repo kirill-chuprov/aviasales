@@ -12,6 +12,7 @@ import com.aviasales.task.R
 import com.aviasales.task.databinding.FragmentChooseDestinationBinding
 import com.aviasales.task.utils.common.BaseFragment
 import com.aviasales.task.utils.common.BaseView
+import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding2.view.clicks
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
@@ -67,17 +68,23 @@ class ChooseDestinationFragment : BaseFragment<FragmentChooseDestinationBinding>
       .subscribe {
         if (vmChooseDestinationScreen.stateReceived().value != null) {
           with(vmChooseDestinationScreen.stateReceived().value) {
-            val bundle = bundleOf(
-              "fromLat" to this!!.cityFrom.lat,
-              "fromLng" to this.cityFrom.lon,
-              "toLat" to this.cityTo.lat,
-              "toLng" to this.cityTo.lon,
-              "townFrom" to this.cityFrom.name,
-              "townTo" to this.cityTo.name
-            )
-            findNavController().navigate(
-              R.id.action_chooseDestinationFragment_to_mapFragment, bundle
-            )
+            if (this!!.cityFrom.name != cityTo.name) {
+              val bundle = bundleOf(
+                FROM_LAT to this.cityFrom.lat,
+                FROM_LNG to this.cityFrom.lon,
+                TO_LAT to this.cityTo.lat,
+                TO_LNG to this.cityTo.lon,
+                TOWN_FROM to this.cityFrom.name,
+                TOWN_TO to this.cityTo.name
+              )
+              findNavController().navigate(
+                R.id.action_chooseDestinationFragment_to_mapFragment, bundle
+              )
+            } else Snackbar.make(
+              viewBinding!!.root,
+              R.string.error_same_town,
+              Snackbar.LENGTH_SHORT
+            ).show()
           }
         }
       }

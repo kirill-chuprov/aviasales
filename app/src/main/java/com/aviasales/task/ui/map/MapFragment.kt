@@ -1,50 +1,84 @@
 package com.aviasales.task.ui.map
 
 import android.animation.ValueAnimator
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
+import androidx.core.animation.doOnEnd
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import com.aviasales.task.R
 import com.aviasales.task.databinding.MarkerBinding
+import com.aviasales.task.ui.destination.FROM_LAT
+import com.aviasales.task.ui.destination.FROM_LNG
+import com.aviasales.task.ui.destination.TOWN_FROM
+import com.aviasales.task.ui.destination.TOWN_TO
+import com.aviasales.task.ui.destination.TO_LAT
+import com.aviasales.task.ui.destination.TO_LNG
+import com.aviasales.task.ui.map.MapFragmentStateIntent.AnimateNextPoint
 import com.aviasales.task.ui.map.MapFragmentStateIntent.CalculatePath
+import com.aviasales.task.ui.map.MapFragmentStateIntent.PassNewMarker
+import com.aviasales.task.ui.map.MapFragmentStateIntent.StopAnimation
 import com.aviasales.task.utils.common.BaseFragment
 import com.aviasales.task.utils.common.BaseView
 import com.aviasales.task.utils.common.getBitmapFromView
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.Dot
+import com.google.android.gms.maps.model.Gap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PatternItem
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.SphericalUtil
 import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBinding>(),
   BaseView<MapFragmentState> {
 
   private val vmMapFragmentScreen: MapFragmentViewModel by viewModel()
-  private val handler by lazy { Handler() }
+  private val eventPublisher: PublishSubject<MapFragmentStateIntent> by lazy { vmMapFragmentScreen.eventPublisher }
 
-  private val fromLat: Double by lazy { arguments!!.getDouble("fromLat", 0.0) }
-  private val fromLng: Double by lazy { arguments!!.getDouble("fromLng", 0.0) }
-  private val toLat: Double by lazy { arguments!!.getDouble("toLat", 0.0) }
-  private val toLng: Double by lazy { arguments!!.getDouble("toLng", 0.0) }
-
-  private val townFrom: String by lazy { arguments!!.getString("townFrom", "") }
-  private val townTo: String by lazy { arguments!!.getString("townTo", "") }
-
+  private val fromLat: Double by lazy { arguments!!.getDouble(FROM_LAT, 0.0) }
+  private val fromLng: Double by lazy { arguments!!.getDouble(FROM_LNG, 0.0) }
+  private val toLat: Double by lazy { arguments!!.getDouble(TO_LAT, 0.0) }
+  private val toLng: Double by lazy { arguments!!.getDouble(TO_LNG, 0.0) }
+  private val townFrom: String by lazy { arguments!!.getString(TOWN_FROM, "") }
+  private val townTo: String by lazy { arguments!!.getString(TOWN_TO, "") }
   private val fromCoordinate: LatLng by lazy { LatLng(fromLat, fromLng) }
   private val toCoordinate: LatLng by lazy { LatLng(toLat, toLng) }
+  private val grayColor: Int by lazy { ContextCompat.getColor(context!!, R.color.aviasalesPrimary) }
+  private val polylinePattern: List<PatternItem> by lazy { listOf(Dot(), Gap(25f)) }
+
+  private lateinit var googleMap: GoogleMap
+  private val planeIcon: BitmapDrawable by lazy {
+    ContextCompat.getDrawable(
+      context!!,
+      R.drawable.ic_plane
+    ) as BitmapDrawable
+  }
+  private val scaledPlaneIcon by lazy {
+    Bitmap.createScaledBitmap(
+      planeIcon.bitmap,
+      100,
+      100,
+      false
+    )
+  }
 
   override fun resLayoutId(): Int = com.aviasales.task.R.layout.fragment_map
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    handleStates()
-  }
+  override fun onCreate(savedInstanceState: Bundle?) =
+    super.onCreate(savedInstanceState).also { handleStates() }
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -52,7 +86,6 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
     savedInstanceState: Bundle?
   ): View? = super.onCreateView(inflater, container, savedInstanceState)
     .also {
-      initIntents()
       initNavigationClicks()
       initMap(savedInstanceState)
     }
@@ -82,11 +115,11 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
     viewBinding!!.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
   }
 
-
   override fun initIntents() {
     viewSubscriptions = Observable.merge(
       listOf(
-        Observable.just(CalculatePath(fromCoordinate, toCoordinate))
+        Observable.just(CalculatePath(fromCoordinate, toCoordinate)),
+        eventPublisher
       )
     ).subscribe(vmMapFragmentScreen.viewIntentsConsumer())
   }
@@ -94,103 +127,135 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
   private fun initMap(savedInstanceState: Bundle?) {
     with(viewBinding!!) {
       map.onCreate(savedInstanceState)
-      map.getMapAsync { googleMap ->
+      map.getMapAsync {
+
+        googleMap = it
 
         val from = LatLng(fromLat, fromLng)
         val to = LatLng(toLat, toLng)
-//
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(fromX))
 
-//        val computedPoints = computePoints(fromX, toY)
-//        val pattern = Arrays.asList(Dot(), Gap(25f))
-//        val polylineOptions = PolylineOptions()
-//        polylineOptions.pattern(pattern)
-//        computedPoints.forEach { polylineOptions.add(it) }
-//        googleMap.addPolyline(polylineOptions)
+        addStartEndMarkers(from, to)
 
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(from))
 
-        val fromMarker = MarkerBinding.inflate(layoutInflater)
-        val markerTo = MarkerBinding.inflate(layoutInflater)
+        initIntents()
 
-        fromMarker.town.text = townFrom
-        markerTo.town.text = townTo
+        vmMapFragmentScreen.stateReceived().value?.let {
+          val state = it
+          if (state.isAnimationInProgress) {
 
-        val bitmapFromMarker = getBitmapFromView(fromMarker.root)
-        val bitmapToMarker = getBitmapFromView(markerTo.root)
+            //draw polyline
+            drawPolyline(getPolyline(), state)
 
-        googleMap.addMarker(MarkerOptions().position(from).anchor(0.5f, 1f))
-          .setIcon(BitmapDescriptorFactory.fromBitmap(bitmapFromMarker))
-        googleMap.addMarker(MarkerOptions().position(to).anchor(0.5f, 1f))
-          .setIcon(BitmapDescriptorFactory.fromBitmap(bitmapToMarker))
+            //get current and next points of animation
+            lateinit var currentPoint: LatLng
+            lateinit var nextPoint: LatLng
 
-//        val bitmapFromView = getBitmapFromView(view)
-//        val scaledBitmap1 = Bitmap.createScaledBitmap(bitmapFromView, 100, 100, false)
-//
-//
-//        googleMap.addMarker(MarkerOptions().position(fromX).anchor(0.5f, 1f))
-//          .setIcon(BitmapDescriptorFactory.fromBitmap(bitmapFromView))
-//        googleMap.addMarker(
-//          MarkerOptions().position(toY)
-//            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-//            .anchor(0.5f, 1f)
-//        )
-//        val plane = googleMap.addMarker(MarkerOptions().flat(true).position(fromX))
-//        val drawable = ContextCompat.getDrawable(context!!, R.drawable.ic_plane) as BitmapDrawable
-//        val scaledBitmap = Bitmap.createScaledBitmap(drawable.bitmap, 100, 100, false)
-//
-//        plane.setIcon(BitmapDescriptorFactory.fromBitmap(scaledBitmap))
-//
-//        animatePlane(computedPoints, plane)
+            state.points?.let {
+              val points = it
+              currentPoint = LatLng(
+                points[state.index].latitude,
+                points[state.index].longitude
+              )
 
+              nextPoint = LatLng(
+                points[state.next].latitude,
+                points[state.next].longitude
+              )
+
+            }
+
+            //add plane to current point on map
+            val plane =
+              googleMap.addMarker(MarkerOptions().flat(true).position(currentPoint)).apply {
+                setIcon(BitmapDescriptorFactory.fromBitmap(scaledPlaneIcon))
+
+                //rotate plane according to next point
+                setAnchor(0.5f, 0.5f)
+                rotation = SphericalUtil.computeHeading(currentPoint, nextPoint).toFloat()
+              }
+
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(currentPoint))
+
+            //set new marker to animation process
+            eventPublisher.onNext(PassNewMarker(plane))
+
+          } else {
+            renderStartPosition(state)
+          }
+        }
       }
     }
   }
 
-  var index = -1
-  var next = 1
+  private fun addStartEndMarkers(from: LatLng, to: LatLng) {
+    val fromMarker = MarkerBinding.inflate(layoutInflater)
+    val markerTo = MarkerBinding.inflate(layoutInflater)
+
+    fromMarker.town.text = townFrom.substring(0, 3)
+    markerTo.town.text = townTo.substring(0, 3)
+
+    val bitmapFromMarker = getBitmapFromView(fromMarker.root)
+    val bitmapToMarker = getBitmapFromView(markerTo.root)
+
+    with(googleMap) {
+      addMarker(MarkerOptions().position(from).anchor(0.5f, 1f))
+        .setIcon(BitmapDescriptorFactory.fromBitmap(bitmapFromMarker))
+      addMarker(MarkerOptions().position(to).anchor(0.5f, 1f))
+        .setIcon(BitmapDescriptorFactory.fromBitmap(bitmapToMarker))
+    }
+  }
+
+  private fun getPolyline(): PolylineOptions =
+    PolylineOptions().apply {
+      color(grayColor)
+      pattern(polylinePattern)
+    }
+
+  private fun drawPolyline(polyline: PolylineOptions, state: MapFragmentState) {
+    state.points?.forEach { polyline.add(it) }
+    googleMap.addPolyline(polyline)
+  }
 
   private fun animatePlane(
+    index: Int,
+    next: Int,
     computedPoints: List<LatLng>,
     marker: Marker
   ) {
-    handler.postDelayed(object : Runnable {
-      override fun run() {
-        lateinit var startPosition: LatLng
-        lateinit var endPosition: LatLng
+    lateinit var startPosition: LatLng
+    lateinit var endPosition: LatLng
 
-        if (index < computedPoints.lastIndex) {
-          index++
-          next = index + 1
-        }
+    if (index < computedPoints.lastIndex) {
+      startPosition = computedPoints[index]
+      endPosition = computedPoints[next]
+    } else eventPublisher.onNext(StopAnimation).also { return }
 
-        if (index < computedPoints.lastIndex) {
-          startPosition = computedPoints[index]
-          endPosition = computedPoints[next]
-        } else return
+    with(ValueAnimator.ofFloat(0.toFloat(), 1.toFloat())) {
+      duration = 200
+      interpolator = LinearInterpolator()
+      addUpdateListener { animation ->
 
-        val valueAnimator = ValueAnimator.ofFloat(0.toFloat(), 1.toFloat())
-        valueAnimator.duration = 300 // duration 3 second
-        valueAnimator.interpolator = LinearInterpolator()
-        valueAnimator.addUpdateListener { animation ->
+        val fraction = animation.animatedFraction
+        val lng = fraction * endPosition.longitude + (1 - fraction) * startPosition.longitude
+        val lat = fraction * endPosition.latitude + (1 - fraction) * startPosition.latitude
 
-          val v = animation.animatedFraction
-          val lng = v * endPosition.longitude + (1 - v) * startPosition.longitude
-          val lat = v * endPosition.latitude + (1 - v) * startPosition.latitude
+        val newPosition = LatLng(lat, lng)
 
-          val newPosition = LatLng(lat, lng)
-          marker.position = newPosition
-          marker.setAnchor(0.5f, 0.5f)
-          marker.rotation = SphericalUtil.computeHeading(startPosition, endPosition).toFloat()
-
-        }
-        valueAnimator.start()
-
-        if (index != computedPoints.lastIndex) {
-          handler.postDelayed(this, 300)
+        with(marker) {
+          position = newPosition
+          setAnchor(0.5f, 0.5f)
+          rotation = SphericalUtil.computeHeading(startPosition, endPosition).toFloat()
         }
       }
-    }, 300)
 
+      doOnEnd {
+        if (index != computedPoints.lastIndex) {
+          eventPublisher.onNext(MapFragmentStateIntent.AnimateNextPoint(index, next, marker))
+        }
+      }
+      start()
+    }
   }
 
   override fun handleStates() {
@@ -199,5 +264,38 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
 
   override fun render(state: MapFragmentState) {
     viewBinding!!.viewState = state
+
+    if (state.success && !state.isAnimationInProgress) {
+      viewBinding!!.map.getMapAsync {
+        googleMap = it
+        val plane = renderStartPosition(state)
+        //run animation
+        eventPublisher.onNext(AnimateNextPoint(state.index, state.next, plane))
+      }
+    }
+
+    if (state.isAnimationInProgress) {
+      with(state) {
+        if (points != null) {
+          animatePlane(index, next, points, marker!!)
+        }
+      }
+    }
+  }
+
+  private fun renderStartPosition(state: MapFragmentState): Marker {
+    //draw polyline
+    drawPolyline(getPolyline(), state)
+
+    //get current and next points
+    val startPoint = LatLng(fromLat, fromLng)
+    val nextPoint = LatLng(state.points?.get(1)!!.longitude, state.points[1].latitude)
+
+    //add marker
+    return googleMap.addMarker(MarkerOptions().flat(true).position(startPoint)).apply {
+      setIcon(BitmapDescriptorFactory.fromBitmap(scaledPlaneIcon))
+      setAnchor(0.5f, 0.5f)
+      rotation = SphericalUtil.computeHeading(startPoint, nextPoint).toFloat()
+    }
   }
 }

@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">@color/aviasalesPrimary</color>
-    <color name="colorPrimaryDark">@color/aviasalesPrimaryDark</color>
-    <color name="colorAccent">@android:color/black</color>
+  <color name="colorPrimary">@color/aviasalesPrimary</color>
+  <color name="colorPrimaryDark">@color/aviasalesPrimaryDark</color>
+  <color name="colorAccent">@android:color/black</color>
 
-    <color name="aviasalesPrimaryDark">#007EA5</color>
-    <color name="aviasalesPrimary">#FF009DCF</color>
-    <color name="colorTextBlack">#323643</color>
-    <color name="marker_color">#FFFBCB69</color>
-    <color name="orange">#FFF87C2C</color>
+  <color name="aviasalesPrimaryDark">#007EA5</color>
+  <color name="aviasalesPrimary">#FF009DCF</color>
+  <color name="colorTextBlack">#323643</color>
+  <color name="marker_color">#FFFBCB69</color>
+  <color name="orange">#FFF87C2C</color>
+  <color name="gray">#646464</color>
 
 
 </resources>

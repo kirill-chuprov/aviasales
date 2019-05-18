@@ -4,7 +4,7 @@ import com.aviasales.task.repository.domain.entity.City
 import com.aviasales.task.repository.domain.interactors.GetCitiesUseCase
 import com.aviasales.task.ui.destination.ChooseDestinationStateChange.CityFromSelected
 import com.aviasales.task.ui.destination.ChooseDestinationStateChange.CityToSelected
-import com.aviasales.task.ui.destination.ChooseDestinationStateChange.ConfigurationChnages
+import com.aviasales.task.ui.destination.ChooseDestinationStateChange.ConfigurationChanges
 import com.aviasales.task.ui.destination.ChooseDestinationStateChange.Error
 import com.aviasales.task.ui.destination.ChooseDestinationStateChange.HideError
 import com.aviasales.task.ui.destination.ChooseDestinationStateChange.Loading
@@ -36,7 +36,7 @@ class ChooseDestinationViewModel(private val getCitiesUseCase: GetCitiesUseCase)
                   Success(list)
                 }
                 .startWithAndErrHandleWithIO(Loading) { Observable.just(Error(it), HideError) }
-            } else Observable.just(ConfigurationChnages)
+            } else Observable.just(ConfigurationChanges)
 
           },
         intentStream.ofType(SelectCityTo::class.java)
@@ -75,7 +75,7 @@ class ChooseDestinationViewModel(private val getCitiesUseCase: GetCitiesUseCase)
         error = null
       )
 
-      is ConfigurationChnages -> previousState.copy(
+      is ConfigurationChanges -> previousState.copy(
         loading = false,
         success = true,
         cityFrom = previousState.cityFrom,

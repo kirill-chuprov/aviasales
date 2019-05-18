@@ -77,6 +77,8 @@ dependencies {
     implementation Deps.koinCoreScope
     implementation Deps.koinAndroidViewModel
 
+    implementation Deps.googleMaps
+
     testImplementation Deps.jUnit
     androidTestImplementation Deps.androidTestRunner
     androidTestImplementation Deps.espresso

@@ -1,6 +1,8 @@
 <resources>
   <string name="app_name">Aviasales</string>
-  <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyChJC2xWAruRIRR1hY-tLtGxhTDwOydI10</string>
+  <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCNIDB3m5SOxHny5tTmYfTW3WdJENaDWxA</string>
   <string name="maps"> Maps </string>
   <string name="search"> Найти билеты </string>
+  <string name="error_network"> Нету интернетов </string>
+  <string name="error_same_town"> Просто дашь кружочек вокруг аэропорта? </string>
 </resources>
