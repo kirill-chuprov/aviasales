@@ -88,7 +88,7 @@ object Version {
   //Google
   const val googleServices = "4.0.1"
   const val googleAuth = "16.0.0"
-  const val googleMaps = "16.0.0"
+  const val googleMaps = "16.1.0"
   const val googleLocation = "16.0.0"
   const val googleMapsUtils = "0.5+"
 
