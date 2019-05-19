@@ -59,6 +59,8 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
   private val grayColor: Int by lazy { ContextCompat.getColor(context!!, R.color.aviasalesPrimary) }
   private val polylinePattern: List<PatternItem> by lazy { listOf(Dot(), Gap(25f)) }
 
+  private val inflater by lazy { layoutInflater }
+
   private lateinit var googleMap: GoogleMap
   private val planeIcon: BitmapDrawable by lazy {
     ContextCompat.getDrawable(
@@ -189,11 +191,19 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
   }
 
   private fun addStartEndMarkers(from: LatLng, to: LatLng) {
-    val fromMarker = MarkerBinding.inflate(layoutInflater)
-    val markerTo = MarkerBinding.inflate(layoutInflater)
 
-    fromMarker.town.text = townFrom.substring(0, 3)
-    markerTo.town.text = townTo.substring(0, 3)
+    val fromMarker = MarkerBinding.inflate(inflater)
+    val markerTo = MarkerBinding.inflate(inflater)
+
+    with(fromMarker.town) {
+      text = townFrom.substring(0, 3)
+      alpha = 0.8f
+    }
+
+    with(markerTo.town) {
+      text = townTo.substring(0, 3)
+      alpha = 0.8f
+    }
 
     val bitmapFromMarker = getBitmapFromView(fromMarker.root)
     val bitmapToMarker = getBitmapFromView(markerTo.root)
@@ -204,6 +214,7 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
       addMarker(MarkerOptions().position(to).anchor(0.5f, 1f))
         .setIcon(BitmapDescriptorFactory.fromBitmap(bitmapToMarker))
     }
+
   }
 
   private fun getPolyline(): PolylineOptions =
