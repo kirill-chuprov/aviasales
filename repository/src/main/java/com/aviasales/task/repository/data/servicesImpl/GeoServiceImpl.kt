@@ -23,14 +23,14 @@ class GeoServiceImpl : GeoService {
       val latLngControlPoints = computeCurveControlPoints(0.5, from, to)
       var step = 0.0
 
-      while (step < 1.01) {
+      while (step < 1.002) {
         val curveLatLng = computeCurvePoints(
           from,
           latLngControlPoints.firstLatLngControlPoint,
           latLngControlPoints.secondLatLngControlPoint, to, step
         )
         points.add(curveLatLng)
-        step += 0.01
+        step += 0.002
       }
       points
     }
