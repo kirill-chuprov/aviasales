@@ -11,7 +11,6 @@ import android.view.animation.LinearInterpolator
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
 import com.aviasales.task.R
 import com.aviasales.task.R.layout
 import com.aviasales.task.databinding.MarkerBinding
@@ -100,7 +99,6 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
     savedInstanceState: Bundle?
   ): View? = super.onCreateView(inflater, container, savedInstanceState)
     .also {
-      initNavigationClicks()
       initMap(savedInstanceState)
     }
 
@@ -130,9 +128,6 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
     viewBinding!!.map.onLowMemory()
   }
 
-  private fun initNavigationClicks() {
-    viewBinding!!.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
-  }
 
   override fun initIntents() {
     viewSubscriptions = Observable.merge(
