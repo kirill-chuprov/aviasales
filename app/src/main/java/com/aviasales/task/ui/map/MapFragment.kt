@@ -13,8 +13,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.aviasales.task.R
+import com.aviasales.task.R.layout
 import com.aviasales.task.databinding.MarkerBinding
-import com.aviasales.task.ui.destination.FROM_LAT
 import com.aviasales.task.ui.destination.FROM_LNG
 import com.aviasales.task.ui.destination.TOWN_FROM
 import com.aviasales.task.ui.destination.TOWN_TO
@@ -48,20 +48,21 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
   private val vmMapFragmentScreen: MapFragmentViewModel by viewModel()
   private val eventPublisher: PublishSubject<MapFragmentStateIntent> by lazy { vmMapFragmentScreen.eventPublisher }
 
-  private val fromLat: Double by lazy { arguments!!.getDouble(FROM_LAT, 0.0) }
-  private val fromLng: Double by lazy { arguments!!.getDouble(FROM_LNG, 0.0) }
-  private val toLat: Double by lazy { arguments!!.getDouble(TO_LAT, 0.0) }
-  private val toLng: Double by lazy { arguments!!.getDouble(TO_LNG, 0.0) }
-  private val townFrom: String by lazy { arguments!!.getString(TOWN_FROM, "") }
-  private val townTo: String by lazy { arguments!!.getString(TOWN_TO, "") }
+  private var fromLat: Double = 0.0
+  private var fromLng: Double = 0.0
+  private var toLat: Double = 0.0
+  private var toLng: Double = 0.0
+  private var townFrom: String = ""
+  private var townTo: String = ""
+
   private val fromCoordinate: LatLng by lazy { LatLng(fromLat, fromLng) }
   private val toCoordinate: LatLng by lazy { LatLng(toLat, toLng) }
-  private val grayColor: Int by lazy { ContextCompat.getColor(context!!, R.color.aviasalesPrimary) }
-  private val polylinePattern: List<PatternItem> by lazy { listOf(Dot(), Gap(25f)) }
 
-  private val inflater by lazy { layoutInflater }
+  private val grayColor: Int by lazy { ContextCompat.getColor(context!!, R.color.aviasalesPrimary) }
+  private val polylinePattern: List<PatternItem> = listOf(Dot(), Gap(25f))
 
   private lateinit var googleMap: GoogleMap
+
   private val planeIcon: BitmapDrawable by lazy {
     ContextCompat.getDrawable(
       context!!,
@@ -77,10 +78,21 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
     )
   }
 
-  override fun resLayoutId(): Int = com.aviasales.task.R.layout.fragment_map
+  override fun resLayoutId(): Int = layout.fragment_map
 
   override fun onCreate(savedInstanceState: Bundle?) =
-    super.onCreate(savedInstanceState).also { handleStates() }
+    super.onCreate(savedInstanceState).also {
+      arguments?.let {
+        fromLat = it.getDouble(FROM_LNG, 0.0)
+        fromLng = it.getDouble(FROM_LNG, 0.0)
+        toLat = it.getDouble(TO_LAT, 0.0)
+        toLng = it.getDouble(TO_LNG, 0.0)
+        townFrom = it.getString(TOWN_FROM, "")
+        townTo = it.getString(TOWN_TO, "")
+      }
+
+      handleStates()
+    }
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -106,6 +118,11 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
   override fun onStop() {
     super.onStop()
     viewBinding!!.map.onStop()
+  }
+
+  override fun onDestroyView() {
+    viewBinding!!.map.onDestroy()
+    super.onDestroyView()
   }
 
   override fun onLowMemory() {
@@ -192,8 +209,8 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
 
   private fun addStartEndMarkers(from: LatLng, to: LatLng) {
 
-    val fromMarker = MarkerBinding.inflate(inflater)
-    val markerTo = MarkerBinding.inflate(inflater)
+    val fromMarker = MarkerBinding.inflate(layoutInflater)
+    val markerTo = MarkerBinding.inflate(layoutInflater)
 
     with(fromMarker.town) {
       text = townFrom.substring(0, 3)
@@ -242,7 +259,7 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
       endPosition = computedPoints[next]
     } else eventPublisher.onNext(StopAnimation).also { return }
 
-    with(ValueAnimator.ofFloat(0.toFloat(), 1.toFloat())) {
+    with(ValueAnimator.ofFloat(0f, 1f)) {
       duration = 32
       interpolator = LinearInterpolator()
       addUpdateListener { animation ->
@@ -262,7 +279,7 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
 
       doOnEnd {
         if (index != computedPoints.lastIndex) {
-          eventPublisher.onNext(MapFragmentStateIntent.AnimateNextPoint(index, next, marker))
+          eventPublisher.onNext(AnimateNextPoint(index, next, marker))
         }
       }
       start()
@@ -302,7 +319,7 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
     val startPoint = LatLng(fromLat, fromLng)
     val nextPoint = LatLng(state.points?.get(1)!!.longitude, state.points[1].latitude)
 
-    //add marker
+    //add markerForAnimation
     return googleMap.addMarker(MarkerOptions().flat(true).position(startPoint)).apply {
       setIcon(BitmapDescriptorFactory.fromBitmap(scaledPlaneIcon))
       setAnchor(0.5f, 0.5f)
