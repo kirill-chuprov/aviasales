@@ -1,6 +1,5 @@
 package com.aviasales.task.ui.destination
 
-import com.aviasales.task.repository.domain.entity.City
 import com.aviasales.task.repository.domain.interactors.GetCitiesUseCase
 import com.aviasales.task.ui.destination.ChooseDestinationStateChange.CityFromSelected
 import com.aviasales.task.ui.destination.ChooseDestinationStateChange.CityToSelected
@@ -45,15 +44,6 @@ class ChooseDestinationViewModel(private val getCitiesUseCase: GetCitiesUseCase)
           .map { CityFromSelected(it.city) }
       )
     )
-
-  private fun City.toPresentation() = ItemState.ItemCity(
-    id = id,
-    name = city,
-    countryCode = countryCode,
-    fullName = latinFullName,
-    lat = location.lat,
-    lon = location.lon
-  )
 
   override fun reduceState(
     previousState: ChooseDestinationState,

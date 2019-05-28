@@ -1,4 +1,4 @@
-package com.aviasales.task.ui.destination
+package com.aviasales.task.ui.destinationsearch
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -9,10 +9,12 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.aviasales.task.BR
 import com.aviasales.task.R
+import com.aviasales.task.ui.destination.ChooseDestinationStateIntent
 import com.aviasales.task.ui.destination.ChooseDestinationStateIntent.SelectCityFrom
 import com.aviasales.task.ui.destination.ChooseDestinationStateIntent.SelectCityTo
-import com.aviasales.task.ui.destination.DestinationAdapter.TownViewHolder
+import com.aviasales.task.ui.destination.ItemState
 import com.aviasales.task.ui.destination.ItemState.ItemCity
+import com.aviasales.task.ui.destinationsearch.DestinationAdapter.TownViewHolder
 import com.jakewharton.rxbinding2.view.clicks
 import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.TimeUnit.MILLISECONDS

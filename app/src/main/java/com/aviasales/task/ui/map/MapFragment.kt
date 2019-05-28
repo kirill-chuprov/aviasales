@@ -14,11 +14,11 @@ import androidx.lifecycle.Observer
 import com.aviasales.task.R
 import com.aviasales.task.R.layout
 import com.aviasales.task.databinding.MarkerBinding
-import com.aviasales.task.ui.destination.FROM_LNG
-import com.aviasales.task.ui.destination.TOWN_FROM
-import com.aviasales.task.ui.destination.TOWN_TO
-import com.aviasales.task.ui.destination.TO_LAT
-import com.aviasales.task.ui.destination.TO_LNG
+import com.aviasales.task.ui.destinationsearch.FROM_LNG
+import com.aviasales.task.ui.destinationsearch.TOWN_FROM
+import com.aviasales.task.ui.destinationsearch.TOWN_TO
+import com.aviasales.task.ui.destinationsearch.TO_LAT
+import com.aviasales.task.ui.destinationsearch.TO_LNG
 import com.aviasales.task.ui.map.MapFragmentStateIntent.AnimateNextPoint
 import com.aviasales.task.ui.map.MapFragmentStateIntent.CalculatePath
 import com.aviasales.task.ui.map.MapFragmentStateIntent.PassNewMarker
@@ -32,6 +32,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.Dot
 import com.google.android.gms.maps.model.Gap
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PatternItem
@@ -128,7 +129,6 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
     viewBinding!!.map.onLowMemory()
   }
 
-
   override fun initIntents() {
     viewSubscriptions = Observable.merge(
       listOf(
@@ -148,9 +148,19 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
         val from = LatLng(fromLat, fromLng)
         val to = LatLng(toLat, toLng)
 
+        val builder = LatLngBounds.Builder()
+        builder.include(from)
+        builder.include(to)
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 17),
+          object : GoogleMap.CancelableCallback {
+            override fun onCancel() {}
+            override fun onFinish() {
+              googleMap.animateCamera(CameraUpdateFactory.zoomTo(googleMap.cameraPosition.zoom - 0.3f))
+            }
+          })
+
         addStartEndMarkers(from, to)
 
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(from))
 
         initIntents()
 
@@ -188,8 +198,6 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
                 setAnchor(0.5f, 0.5f)
                 rotation = SphericalUtil.computeHeading(currentPoint, nextPoint).toFloat()
               }
-
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(currentPoint))
 
             //set new marker to animation process
             eventPublisher.onNext(PassNewMarker(plane))
@@ -255,7 +263,7 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
     } else eventPublisher.onNext(StopAnimation).also { return }
 
     with(ValueAnimator.ofFloat(0f, 1f)) {
-      duration = 32
+      duration = 10
       interpolator = LinearInterpolator()
       addUpdateListener { animation ->
 

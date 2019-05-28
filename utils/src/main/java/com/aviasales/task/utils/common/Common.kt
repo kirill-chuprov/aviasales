@@ -1,33 +1,34 @@
 package com.aviasales.task.utils.common
 
 import android.content.res.Resources
-import android.view.animation.OvershootInterpolator
-import android.widget.ImageView
-import androidx.annotation.DrawableRes
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
-import android.R.layout
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.view.View
 import android.view.View.MeasureSpec
-
-
+import android.widget.TextView
+import com.jakewharton.rxbinding3.widget.TextViewAfterTextChangeEvent
+import com.jakewharton.rxbinding3.widget.afterTextChangeEvents
+import io.reactivex.Observable
+import io.reactivex.ObservableTransformer
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.TimeUnit.MILLISECONDS
+import kotlin.LazyThreadSafetyMode.NONE
 
 val Int.px: Int get() = (this * Resources.getSystem().displayMetrics.density).toInt()
 val Int.dp: Int get() = (this / Resources.getSystem().displayMetrics.density).toInt()
 
-fun changeViewImageResource(imageView: ImageView, @DrawableRes resId: Int) {
-  imageView.rotation = 0f
-  imageView.animate()
-    .rotationBy(360f)
-    .setDuration(400)
-    .setInterpolator(OvershootInterpolator())
-    .start()
-
-  imageView.postDelayed({ imageView.setImageResource(resId) }, 120)
+val editTextAfterTextChangeTransformer by lazy(NONE) {
+  ObservableTransformer<TextViewAfterTextChangeEvent, String> {
+    it.skip(2)
+      .map { it.editable.toString() }
+      .distinctUntilChanged()
+      .debounce(200, MILLISECONDS)
+  }
 }
+
+fun <T> TextView.debouncedAfterTextChanges(mapper: (String) -> T): Observable<T> =
+  afterTextChangeEvents().compose(editTextAfterTextChangeTransformer).map(mapper)
 
 inline fun <T, reified R> Observable<T>.startWithAndErrHandleWithIO(
   startWith: R,

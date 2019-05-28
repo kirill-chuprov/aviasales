@@ -10,6 +10,15 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.aviasales.task.R
 import com.aviasales.task.databinding.FragmentChooseDestinationBinding
+import com.aviasales.task.ui.destinationsearch.DestinationBottomSheetDialogFragment
+import com.aviasales.task.ui.destinationsearch.FROM_LAT
+import com.aviasales.task.ui.destinationsearch.FROM_LNG
+import com.aviasales.task.ui.destinationsearch.TOWN_FROM
+import com.aviasales.task.ui.destinationsearch.TOWN_TO
+import com.aviasales.task.ui.destinationsearch.TO_LAT
+import com.aviasales.task.ui.destinationsearch.TO_LNG
+import com.aviasales.task.ui.destinationsearch.TYPE_FROM
+import com.aviasales.task.ui.destinationsearch.TYPE_TO
 import com.aviasales.task.utils.common.BaseFragment
 import com.aviasales.task.utils.common.BaseView
 import com.google.android.material.snackbar.Snackbar
@@ -44,7 +53,7 @@ class ChooseDestinationFragment : BaseFragment<FragmentChooseDestinationBinding>
   override fun initIntents() {
     viewSubscriptions = Observable.merge(
       listOf(
-        Observable.just(ChooseDestinationStateIntent.GetCities("mow", "ru")),
+        Observable.just(ChooseDestinationStateIntent.GetCities("mos", "ru")),
         eventPublisher
       )
     ).subscribe(vmChooseDestinationScreen.viewIntentsConsumer())
@@ -54,14 +63,20 @@ class ChooseDestinationFragment : BaseFragment<FragmentChooseDestinationBinding>
   private fun initClicks() {
     viewBinding!!.tvDestinationTo.clicks()
       .subscribe {
-        DestinationBottomSheetDialogFragment.newInstance(TYPE_TO)
+        DestinationBottomSheetDialogFragment.newInstance(
+          TYPE_TO,
+          viewBinding!!.tvDestinationTo.text.toString()
+        )
           .show(childFragmentManager, "ChooseFrom")
       }
 
     viewBinding!!.tvDestinationFrom.clicks()
       .subscribe {
-        DestinationBottomSheetDialogFragment.newInstance(TYPE_FROM)
-          .show(childFragmentManager, "ChooseTo")
+        DestinationBottomSheetDialogFragment.newInstance(
+          TYPE_FROM,
+          viewBinding!!.tvDestinationFrom.text.toString()
+        )
+          .show(childFragmentManager, "ChooseFrom")
       }
 
     viewBinding!!.btnSearch.clicks()

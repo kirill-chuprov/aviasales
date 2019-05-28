@@ -42,6 +42,7 @@ dependencies {
     implementation Deps.rxRelay
     implementation Deps.rxKotlin
     implementation Deps.rxAndroid
+    implementation Deps.rxBinding
 
     implementation Deps.glide
     kapt Deps.glideCompiler

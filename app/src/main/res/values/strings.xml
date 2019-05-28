@@ -5,4 +5,5 @@
   <string name="search"> Найти билеты </string>
   <string name="error_network"> Нету интернетов </string>
   <string name="error_same_town"> Просто дашь кружочек вокруг аэропорта? </string>
+  <string name="search_town"> Введите город </string>
 </resources>
