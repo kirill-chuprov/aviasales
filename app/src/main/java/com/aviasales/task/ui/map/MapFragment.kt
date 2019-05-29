@@ -263,7 +263,7 @@ class MapFragment : BaseFragment<com.aviasales.task.databinding.FragmentMapBindi
     } else eventPublisher.onNext(StopAnimation).also { return }
 
     with(ValueAnimator.ofFloat(0f, 1f)) {
-      duration = 10
+      duration = 30
       interpolator = LinearInterpolator()
       addUpdateListener { animation ->
 
